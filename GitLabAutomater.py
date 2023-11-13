@@ -1,5 +1,6 @@
 import requests
 import getpass
+import pandas
 
 #Tests connection and gives information about the user of the token
 token = getpass.getpass("Token: ")
@@ -42,3 +43,22 @@ data= {
 
 postrequest = requests.post(api_groups_url,headers=headers,data=data)
 print(postrequest.text)
+
+#shows the information about the to be created classes
+klasgroep = []
+vak = []
+
+df = pandas.read_csv("testfile.csv", header=None)
+for row in df.iloc[:, 0]:
+    if row not in vak:
+        vak.append(row)
+for row in df.iloc[:, 1]:
+    if row not in klasgroep:
+        klasgroep.append(row)
+vak.sort()
+klasgroep.sort()
+
+student = {}
+for index, row in df.iterrows():
+    student.update({index: [row[2], row[0], row[1]]})
+    print(f"Nu moet een groep gemaakt worden voor {student[index][0]}. Dit is een subgroep van klasgroep {student[index][2]} ({klasgroep.index(student[index][2])}) voor het vak {student[index][1]} met id ({vak.index(student[index][1])}).")
