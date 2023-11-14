@@ -17,8 +17,8 @@ print(response.json())
 #Creates a group PythonAdvancedELIVERMEULEN
 api_groups_url = "https://gitlab.apstudent.be/api/v4/groups"
 data = {
-    "name": "blub", #need to be changed to PythonAdvancedELIVERMEULEN
-    "path": "blub-group" #need to be changed to PythonAdvancedELIVERMEULEN-group
+    "name": "PythonAdvancedELIVERMEULEN", #need to be changed to PythonAdvancedELIVERMEULEN
+    "path": "PythonAdvancedELIVERMEULEN-group" #need to be changed to PythonAdvancedELIVERMEULEN-group
 }
 
 get_existing_group_url = f"https://gitlab.apstudent.be/api/v4/groups?search={data['name']}"
@@ -66,23 +66,32 @@ for index, row in df.iterrows():
 
 #creates the groupes from which te information is shown above
 #create vak subroup
-print(group_id)
 vakken = {}
-for course in vak:
+for index, student_info in student.items():
     data={
-        "name": course,
-        "path": course,
+        "name": student_info[1],
+        "path": student_info[1],
         "parent_id": group_id,
     }
 
     postrequest = requests.post(api_groups_url,headers=headers, data=data)
-    print(postrequest.text)
-    vakken.update({course: postrequest.json().get("id")})
+    if postrequest.status_code == 201:        
+        print(postrequest.text)
+        student_info[1] = postrequest.json().get("id")
+    else:
+        get_existing_group_url = f"https://gitlab.apstudent.be/api/v4/groups?search={data['name']}"
+        get_existing_group_request = requests.get(get_existing_group_url, headers=headers)
+
+        existing_groups = get_existing_group_request.json()
+        for group in existing_groups:
+            if group.get("parent_id") == group_id:
+                student_info[1] = group.get("id")
+                print(student_info[1])
 
 #create klas subgroup
-klassen = {}
 for index, student_info in student.items():
-    vak_id = vakken.get(student_info[1])
+    vak_id = student_info[1]
+    print(vak_id)
     data={
         "name": student_info[2],
         "path": student_info[2],
@@ -90,5 +99,25 @@ for index, student_info in student.items():
     }
 
     postrequest = requests.post(api_groups_url,headers=headers, data=data)
+    if postrequest.status_code == 201:
+        student_info[2] = postrequest.json().get("id")
+    else:
+        get_existing_group_url = f"https://gitlab.apstudent.be/api/v4/groups?search={data['name']}"
+        get_existing_group_request = requests.get(get_existing_group_url, headers=headers)
+
+        existing_groups = get_existing_group_request.json()
+        for group in existing_groups:
+            if group.get("parent_id") == vak_id:
+                student_info[2] = group.get("id")
+
+print(vakken)
+#create students
+for index,students in student.items():
+    print(students[2])
+    data ={
+        "name": students[0].split("@")[0],
+        "path": students[0].split("@")[0],
+        "parent_id": students[2]
+    }
+    postrequest = requests.post(api_groups_url,headers=headers, data=data)
     print(postrequest.text)
-    klassen.update({student_info[2]: postrequest.json().get("id")})
