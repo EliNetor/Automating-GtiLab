@@ -2,13 +2,11 @@ import requests
 import git
 
 #returns a list of poject id's for given group name
-def ShowProjects(group_name,headers):
-    existing_group = GetGroupJSON(headers,group_name)
+def ShowProjects(headers,g_id):
 
     project_ids = []
 
-    if existing_group:
-        g_id = existing_group[0].get("id")
+    if g_id:
 
         group_projects_url = f"https://gitlab.apstudent.be/api/v4/groups/{g_id}/projects"
         group_projects_request = requests.get(group_projects_url,headers=headers)
@@ -35,14 +33,9 @@ def CloneRepo(ids,headers,local_directory):
         except git.exc.GitError:
             pass
 
-def GetSubGroups(headers,group_name):
-    existing_group = GetGroupJSON(headers,group_name)
-
-    if existing_group:
-        print(existing_group[0].get("id"))
-
 #function to get all the information about a group based on name
 def GetGroupJSON(headers,group_name):
     get_existing_group_url = f"https://gitlab.apstudent.be/api/v4/groups?search={group_name}" 
     get_existing_group_request = requests.get(get_existing_group_url, headers=headers)
     return get_existing_group_request.json()
+
