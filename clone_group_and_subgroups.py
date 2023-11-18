@@ -13,3 +13,5 @@ headers = {
 project_ids = f.ShowProjects(group_naam,headers)
 
 f.CloneRepo(project_ids,headers,local_path)
+
+f.GetSubGroups(headers,group_naam)
